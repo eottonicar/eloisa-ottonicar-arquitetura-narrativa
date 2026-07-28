@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import heroArquiteturaAtmosfera from './assets/hero-arquitetura-atmosfera.png'
+import EntryPortal from './components/EntryPortal.jsx'
 
 const ROUTES = {
   home: '/',
@@ -20,35 +22,76 @@ const normalizePath = (rawPath = '/') => {
 function App() {
   const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname || '/'))
   const mapaRef = useRef(null)
-  const manifestoRef = useRef(null)
   const senseFieldRef = useRef(null)
-  const [activeManifestoNode, setActiveManifestoNode] = useState('')
-  const [manifestoUnlocked, setManifestoUnlocked] = useState([])
-  const [manifestoSignals, setManifestoSignals] = useState({
-    'balloons-main': 0,
-    'balloons-fragment': 0,
-    'silent-author': 0,
-  })
-  const [manifestoField, setManifestoField] = useState({
-    x: 50,
-    y: 50,
-    presence: 0,
-  })
-  const manifestoRafRef = useRef(0)
-  const manifestoPointerRef = useRef({ x: 0, y: 0 })
   const mapaInteractionRef = useRef({
     handlePointerMove: () => {},
     handlePointerEnter: () => {},
     handlePointerLeave: () => {},
   })
-  const manifestoFragments = {
-    'balloons-main':
-      'Eu não começo um projeto pela forma.\nComeço pela sensação que ele precisa provocar.\n\nAntes do desenho, vêm a atmosfera, a luz, a cor, a matéria.\nA forma aparece depois, como consequência.',
-    'balloons-fragment':
-      'Não me interessa criar espaços que só sejam vistos.\nMe interessa criar experiências que mudem a percepção de quem entra.',
-    'silent-author': 'Cada projeto nasce de um estado.\nDepois, esse estado vira matéria, contraste, escala, textura e vazio.\n\nPara mim, arquitetura não termina na função.\nEla começa no que consegue provocar.',
+
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const [activeTerritory, setActiveTerritory] = useState(null)
+  const mapaCanvasRef = useRef(null)
+  const tapGateRef = useRef({ id: null, wasActive: false })
+
+  const territories = [
+    {
+      id: 'quem-sou-eu',
+      slot: 'p-1',
+      name: 'Quem sou',
+      phrase: 'Antes dos mundos, existe quem os imagina.',
+      signal: 'presence',
+      links: 'line-1',
+    },
+    {
+      id: 'rupture-world',
+      slot: 'p-2',
+      name: 'Rupture World',
+      phrase: 'Atravesse uma realidade em fragmentos.',
+      signal: 'rupture',
+      links: 'line-1 line-2',
+      route: null,
+    },
+    {
+      id: 'big-bang',
+      slot: 'p-3',
+      name: 'Big Bang',
+      phrase: 'Entre onde espaço, matéria e sensação nascem.',
+      signal: 'bigbang',
+      links: 'line-2',
+    },
+    {
+      id: 'manifesto',
+      slot: 'p-4',
+      name: 'Manifesto',
+      phrase: 'Arquitetura não é cenário. É uma força narrativa.',
+      signal: 'pulse',
+      links: 'line-3',
+    },
+    {
+      id: 'no-real',
+      slot: 'p-5',
+      name: 'No Real',
+      phrase: 'Quando a narrativa encontra a matéria.',
+      signal: 'noreal',
+      links: 'line-4',
+      route: ROUTES.applied,
+    },
+    {
+      id: 'contato',
+      slot: 'p-6',
+      name: 'Contato',
+      phrase: 'Toda travessia conduz a um novo começo.',
+      signal: 'contato',
+      links: 'line-4',
+      route: ROUTES.contact,
+    },
+  ]
+
+  const handleTerritoryReveal = (id) => setActiveTerritory(id)
+  const handleTerritoryDismiss = (id) => {
+    setActiveTerritory((current) => (current === id ? null : current))
   }
-  const manifestoNodeOrder = ['balloons-main', 'balloons-fragment', 'silent-author']
   const projectGroups = [
     {
       title: 'Mundos autorais',
@@ -160,70 +203,27 @@ function App() {
     }
     window.requestAnimationFrame(tick)
   }
-  const activateManifestoNode = (node) => {
-    setActiveManifestoNode(node)
-    setManifestoUnlocked((prev) => (prev.includes(node) ? prev : [...prev, node]))
-  }
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 
-  const updateManifestoSignals = () => {
-    manifestoRafRef.current = 0
-    const stage = manifestoRef.current
-    if (!stage) return
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const applyMotionPreference = () => setReducedMotion(query.matches)
+    applyMotionPreference()
+    query.addEventListener('change', applyMotionPreference)
+    return () => query.removeEventListener('change', applyMotionPreference)
+  }, [])
 
-    const rect = stage.getBoundingClientRect()
-    if (!rect.width || !rect.height) return
-
-    const { x, y } = manifestoPointerRef.current
-    const relX = clamp(((x - rect.left) / rect.width) * 100, 0, 100)
-    const relY = clamp(((y - rect.top) / rect.height) * 100, 0, 100)
-    const nodes = Array.from(stage.querySelectorAll('.manifesto-point'))
-    let strongest = 0
-    const nextSignals = {
-      'balloons-main': 0,
-      'balloons-fragment': 0,
-      'silent-author': 0,
+  useEffect(() => {
+    const root = document.documentElement
+    const handleVisibilityChange = () => {
+      root.classList.toggle('page-hidden', document.hidden)
     }
-
-    nodes.forEach((node) => {
-      const key = node.dataset.node
-      if (!key) return
-      const nodeRect = node.getBoundingClientRect()
-      const cx = nodeRect.left + nodeRect.width * 0.5
-      const cy = nodeRect.top + nodeRect.height * 0.5
-      const dist = Math.hypot(x - cx, y - cy)
-      const radius = Math.max(nodeRect.width, nodeRect.height) * 1.1 + 140
-      const signal = clamp(1 - dist / radius, 0, 1)
-      nextSignals[key] = Number(signal.toFixed(3))
-      if (signal > strongest) strongest = signal
-    })
-
-    setManifestoSignals(nextSignals)
-    setManifestoField({
-      x: Number(relX.toFixed(2)),
-      y: Number(relY.toFixed(2)),
-      presence: Number(strongest.toFixed(3)),
-    })
-  }
-
-  const handleManifestoMove = (event) => {
-    manifestoPointerRef.current = { x: event.clientX, y: event.clientY }
-    if (manifestoRafRef.current) return
-    manifestoRafRef.current = window.requestAnimationFrame(updateManifestoSignals)
-  }
-
-  const handleManifestoLeave = () => {
-    if (manifestoRafRef.current) {
-      window.cancelAnimationFrame(manifestoRafRef.current)
-      manifestoRafRef.current = 0
+    handleVisibilityChange()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      root.classList.remove('page-hidden')
     }
-    setManifestoSignals({
-      'balloons-main': 0,
-      'balloons-fragment': 0,
-      'silent-author': 0,
-    })
-    setManifestoField({ x: 50, y: 50, presence: 0 })
-  }
+  }, [])
 
   useEffect(() => {
     const handlePopState = () => {
@@ -815,27 +815,9 @@ function App() {
 
   return (
       <main className="temple">
-        <section className="hero-stage" aria-label="Abertura do site">
-        <span className="hero-orbit orbit-a" aria-hidden="true"></span>
-        <span className="hero-orbit orbit-b" aria-hidden="true"></span>
-        <span className="hero-trace trace-a" aria-hidden="true"></span>
-        <span className="hero-trace trace-b" aria-hidden="true"></span>
-
-        <section className="hero">
-          <h1 className="hero-title">
-            <img
-              className="hero-title-image"
-              src="/images/hero/hero-title.png"
-              alt="alguns ESPAÇOS se VISITAM OUTROS se ATRAVESSAM"
-            />
-          </h1>
-        </section>
-      </section>
-
-      <p className="author-divider author-divider-top">Eloisa Ottonicar</p>
-
+      <EntryPortal />
       <section
-        className="mapa-stage"
+        className={`mapa-stage mapa-stage--gate${reducedMotion ? ' mapa-stage--reduced' : ''}`}
         ref={mapaRef}
         aria-label="mapa da travessia"
         onPointerMove={(event) => mapaInteractionRef.current.handlePointerMove(event)}
@@ -846,15 +828,20 @@ function App() {
         onMouseLeave={() => mapaInteractionRef.current.handlePointerLeave()}
       >
         <header className="mapa-header">
+          <p className="mapa-clue">ENCONTRE A PASSAGEM</p>
           <h2 className="mapa-title">mapa da travessia</h2>
           <p className="mapa-subtitle">
-            coordenadas de visão, mundos e sistema
+            prepare-se para atravessar.
           </p>
-          <p className="mapa-signature">Eloisa Ottonicar - Arquitetura Narrativa</p>
         </header>
         <span className="mapa-strike-image" aria-hidden="true"></span>
 
-        <div className="mapa-canvas">
+        <div className="mapa-canvas" ref={mapaCanvasRef}>
+          <span
+            className="mapa-depth-image"
+            aria-hidden="true"
+            style={{ backgroundImage: `url(${heroArquiteturaAtmosfera})` }}
+          />
           <span className="mapa-layer layer-far" aria-hidden="true"></span>
           <span className="mapa-layer layer-mid-a" aria-hidden="true"></span>
           <span className="mapa-layer layer-mid-b" aria-hidden="true"></span>
@@ -867,176 +854,66 @@ function App() {
           <span className="mapa-line line-3" aria-hidden="true"></span>
           <span className="mapa-line line-4" aria-hidden="true"></span>
 
-          <article
-            className="mapa-point p-1 mapa-point--portal"
-            data-node="p1"
-            data-links="line-1"
-            role="link"
-            tabIndex={0}
-            onClick={() => navigateTo(ROUTES.worlds)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                navigateTo(ROUTES.worlds)
+          <span className="mapa-noise" aria-hidden="true"></span>
+          <span className="mapa-scanlines" aria-hidden="true"></span>
+          <span className="mapa-chroma" aria-hidden="true"></span>
+          <span className="mapa-tracking" aria-hidden="true"></span>
+          <span className="mapa-dropout" aria-hidden="true"></span>
+
+          {territories.map((territory) => {
+            const isRevealed = activeTerritory === territory.id
+            const activate = () => {
+              const gate = tapGateRef.current
+              const wasActiveBeforeThisTap = gate.id === territory.id ? gate.wasActive : isRevealed
+              if (territory.route && wasActiveBeforeThisTap) {
+                navigateTo(territory.route)
+              } else {
+                handleTerritoryReveal(territory.id)
               }
-            }}
-            aria-label="Abrir página Mundos"
-          >
-            <h3>Mundos</h3>
-            <p>universos em órbita</p>
-          </article>
-          <article
-            className="mapa-point p-2 mapa-point--portal"
-            data-node="p2"
-            data-links="line-1 line-2"
-            role="link"
-            tabIndex={0}
-            onClick={() => navigateTo(ROUTES.applied)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                navigateTo(ROUTES.applied)
-              }
-            }}
-            aria-label="Abrir página Arquitetura aplicada"
-          >
-            <h3>No real</h3>
-            <p>Quando a narrativa encontra o real</p>
-          </article>
-          <article
-            className="mapa-point p-6 mapa-point--portal"
-            data-node="p6"
-            data-links="line-4"
-            role="link"
-            tabIndex={0}
-            onClick={() => navigateTo(ROUTES.contact)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                navigateTo(ROUTES.contact)
-              }
-            }}
-            aria-label="Abrir página Contato"
-          >
-            <h3>Contato</h3>
-            <p>ponto de aproximação</p>
-          </article>
-        </div>
-      </section>
+            }
 
-      <section
-        ref={manifestoRef}
-        className={`manifesto-experience${activeManifestoNode ? ` is-engaged is-${activeManifestoNode}` : ''}`}
-        aria-label="abertura imersiva do manifesto"
-        onMouseMove={handleManifestoMove}
-        onMouseEnter={handleManifestoMove}
-        onMouseLeave={handleManifestoLeave}
-        style={{
-          '--manifesto-cursor-x': `${manifestoField.x}%`,
-          '--manifesto-cursor-y': `${manifestoField.y}%`,
-          '--manifesto-presence': manifestoField.presence,
-        }}
-      >
-        <figure className="manifesto-experience__base">
-          <img
-            src="/images/FOTOS 2/balao.png"
-            alt="Eloisa entre baloes coloridos"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-          />
-        </figure>
-
-        <div className="manifesto-experience__veil" aria-hidden="true"></div>
-        <div className="manifesto-experience__night-layer" aria-hidden="true"></div>
-        <div className="manifesto-experience__mesh" aria-hidden="true"></div>
-
-        <h2 className="manifesto-experience__line">
-          Antes da forma,
-          <br />
-          existe atmosfera.
-        </h2>
-        <p className="manifesto-experience__subtitle">Manifesto por Eloísa Ottonicar</p>
-
-        <button
-          type="button"
-          className={`manifesto-point manifesto-point--main manifesto-point--primary${
-            activeManifestoNode === 'balloons-main' ? ' is-active' : ''
-          }${activeManifestoNode && activeManifestoNode !== 'balloons-main' ? ' is-muted' : ''}${
-            manifestoSignals['balloons-main'] > 0.12 ? ' is-awake' : ''
-          }`}
-          data-node="balloons-main"
-          onClick={() => activateManifestoNode('balloons-main')}
-          onPointerDown={() => activateManifestoNode('balloons-main')}
-          aria-label="ativar fragmento autora nos baloes"
-          style={{ '--signal': manifestoSignals['balloons-main'] }}
-        >
-          <span className="manifesto-point__core" aria-hidden="true"></span>
-          <span className="manifesto-point__order" aria-hidden="true">01°</span>
-        </button>
-
-        <button
-          type="button"
-          className={`manifesto-point manifesto-point--fragment manifesto-point--secondary${
-            activeManifestoNode === 'balloons-fragment' ? ' is-active' : ''
-          }${activeManifestoNode && activeManifestoNode !== 'balloons-fragment' ? ' is-muted' : ''}${
-            manifestoSignals['balloons-fragment'] > 0.12 ? ' is-awake' : ''
-          }`}
-          data-node="balloons-fragment"
-          onClick={() => activateManifestoNode('balloons-fragment')}
-          onPointerDown={() => activateManifestoNode('balloons-fragment')}
-          aria-label="ativar fragmento dos baloes"
-          style={{ '--signal': manifestoSignals['balloons-fragment'] }}
-        >
-          <span className="manifesto-point__core" aria-hidden="true"></span>
-          <span className="manifesto-point__order" aria-hidden="true">02°</span>
-        </button>
-
-        <button
-          type="button"
-          className={`manifesto-point manifesto-point--silent manifesto-point--secondary${
-            activeManifestoNode === 'silent-author' ? ' is-active' : ''
-          }${activeManifestoNode && activeManifestoNode !== 'silent-author' ? ' is-muted' : ''}${
-            manifestoSignals['silent-author'] > 0.12 ? ' is-awake' : ''
-          }`}
-          data-node="silent-author"
-          onClick={() => activateManifestoNode('silent-author')}
-          onPointerDown={() => activateManifestoNode('silent-author')}
-          aria-label="ativar fragmento intimidade"
-          style={{ '--signal': manifestoSignals['silent-author'] }}
-        >
-          <span className="manifesto-point__core" aria-hidden="true"></span>
-          <span className="manifesto-point__order" aria-hidden="true">03°</span>
-        </button>
-
-        <div
-          className={`manifesto-reveal${manifestoUnlocked.length ? ' is-visible' : ''}`}
-          aria-live="polite"
-          data-lenis-prevent
-          data-lenis-prevent-wheel
-          onWheelCapture={(event) => {
-            const el = event.currentTarget
-            if (el.scrollHeight <= el.clientHeight) return
-            el.scrollTop += event.deltaY
-            event.preventDefault()
-            event.stopPropagation()
-          }}
-        >
-          <div className="manifesto-reveal__stack">
-            {manifestoNodeOrder
-              .filter((node) => manifestoUnlocked.includes(node))
-              .map((node) => (
-              <p
-                key={node}
-                className={`manifesto-reveal__fragment${activeManifestoNode === node ? ' is-current' : ''}`}
+            return (
+              <article
+                key={territory.id}
+                className={`mapa-point ${territory.slot} mapa-point--portal mapa-point--${territory.signal}${
+                  isRevealed ? ' is-revealed' : ''
+                }`}
+                data-node={territory.slot.replace('p-', 'p')}
+                data-links={territory.links}
+                role="link"
+                tabIndex={0}
+                onClick={activate}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    activate()
+                  }
+                }}
+                onPointerDown={() => {
+                  tapGateRef.current = { id: territory.id, wasActive: activeTerritory === territory.id }
+                }}
+                onPointerEnter={(event) => {
+                  if (event.pointerType === 'mouse') handleTerritoryReveal(territory.id)
+                }}
+                onPointerLeave={(event) => {
+                  if (event.pointerType === 'mouse') handleTerritoryDismiss(territory.id)
+                }}
+                onFocus={() => handleTerritoryReveal(territory.id)}
+                onBlur={() => handleTerritoryDismiss(territory.id)}
+                aria-label={
+                  territory.route
+                    ? `Abrir ${territory.name} — ${territory.phrase}`
+                    : `${territory.name} — ${territory.phrase}`
+                }
               >
-                {manifestoFragments[node]}
-              </p>
-              ))}
-          </div>
+                <span className="mapa-point__signal" aria-hidden="true" />
+                <h3>{territory.name}</h3>
+                <p className="mapa-point__phrase">{territory.phrase}</p>
+              </article>
+            )
+          })}
         </div>
       </section>
-
     </main>
   )
 }
