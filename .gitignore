@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local review captures and scripts (not part of the site)
+/hero-*.png
+/_visual-check.mjs
+/.mobile-review/
+/sites/

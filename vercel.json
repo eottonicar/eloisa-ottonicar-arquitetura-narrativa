@@ -1,4 +1,9 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "feat/reformulacao-editorial": false
+    }
+  },
   "routes": [
     {
       "handle": "filesystem"
