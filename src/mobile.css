@@ -1,0 +1,264 @@
+/* Mobile final: regras isoladas para preservar a composição do desktop. */
+@media (max-width: 900px) {
+  .temple .page-back-btn {
+    width: 48px;
+    height: 48px;
+    top: max(12px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+    touch-action: manipulation;
+  }
+
+  .temple .mapa-header {
+    position: relative;
+    top: auto;
+  }
+
+  .temple .mapa-canvas {
+    min-height: 660px;
+  }
+
+  .temple .mapa-point {
+    width: 44%;
+    max-width: 190px;
+    min-height: 64px;
+    padding: 12px 10px 12px 14px;
+    touch-action: manipulation;
+  }
+
+  .temple .mapa-point h3 {
+    font-size: clamp(12px, 3.1vw, 16px);
+    letter-spacing: 0.04em;
+    overflow-wrap: normal;
+  }
+
+  .temple .mapa-point .mapa-point__phrase {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #ede9df;
+    text-shadow: 0 1px 6px #111;
+  }
+
+  .temple .mapa-point.is-revealed {
+    z-index: 20;
+    background: rgb(17 17 17 / 0.88);
+  }
+
+  /* Alvos de toque permanecem parados, mesmo com o campo animado. */
+  .temple .mapa-point,
+  .temple .mapa-stage.mapa-static .mapa-point {
+    animation: none;
+    transform: none;
+    rotate: none;
+  }
+
+  .temple .p-1 { top: 3%; left: 2%; right: auto; }
+  .temple .p-2 { top: 18%; right: 2%; left: auto; }
+  .temple .p-3 { top: 35%; right: 2%; left: auto; }
+  .temple .p-4 { top: 51%; left: 2%; right: auto; }
+  .temple .p-5 { top: 68%; right: 2%; left: auto; }
+  .temple .p-6 { top: 84%; left: 2%; right: auto; }
+
+  .temple .projects-journey--page {
+    padding: 76px max(16px, env(safe-area-inset-right)) 24px
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .temple .projects-group-label {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.18em;
+    border-radius: 0;
+  }
+
+  .temple .projects-stream { gap: 32px; }
+
+  .temple .projects-group .project-field {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .temple .projects-group .project-field .project-field__media {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    transform: none;
+    overflow: hidden;
+  }
+
+  .temple .projects-group .project-field .project-field__media img {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    object-fit: contain !important;
+    transform: none !important;
+  }
+
+  .temple .projects-group .project-field .project-field__veil { display: none; }
+
+  .temple .projects-group .project-field .project-field__content,
+  .temple .projects-group .project-field .project-image-caption {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 16px;
+    margin: 0;
+    border-radius: 0;
+    text-align: left;
+    align-items: flex-start;
+    gap: 12px;
+    background: #111;
+  }
+
+  .temple .projects-group .project-field .project-field__content h4,
+  .temple .projects-group .project-field .project-image-caption h4 {
+    max-width: 100%;
+    font-size: clamp(26px, 7.5vw, 42px);
+    line-height: 1.08;
+    white-space: normal;
+    letter-spacing: -0.02em;
+    text-shadow: none;
+  }
+
+  .temple .projects-group .project-field .project-title--letters {
+    display: block;
+  }
+
+  .temple .projects-group .project-field .project-field__bridge,
+  .temple .projects-group .project-field .project-field__entry,
+  .temple .projects-group .project-field li {
+    max-width: 100%;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: normal;
+    color: #ede9df;
+    text-shadow: none;
+  }
+
+  .temple .projects-group .project-field .project-field__content ul,
+  .temple .projects-group .project-field .project-image-caption ul {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    transform: none;
+    width: 100%;
+    gap: 8px 16px;
+    margin: 12px 0 0;
+    padding: 0;
+  }
+
+  .temple .projects-group .project-field li::after { content: none !important; }
+
+  .temple .projects-group .project-field .project-field__content li,
+  .temple .projects-group .project-field .project-image-caption li {
+    color: #ede9df;
+    text-shadow: none;
+  }
+
+  .temple .projects-group--worlds .project-field--solaris .project-field__content h4 {
+    color: #ff5b64;
+  }
+
+  .temple .projects-group--applied .project-field--home-office-i-g
+    .project-field__media--stack .project-image-frame:nth-child(2)::after {
+    content: none;
+  }
+
+  .temple .projects-group .project-field .project-field__intro-video-wrap {
+    height: auto;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+
+  .temple .projects-group .project-field video {
+    width: 100%;
+    height: auto;
+    max-height: 80svh;
+    object-fit: contain;
+  }
+
+  .temple .contact-epilogue {
+    height: auto;
+    min-height: 100svh;
+    padding: 100px max(24px, env(safe-area-inset-right))
+      max(32px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  }
+
+  .temple .contact-epilogue__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: min(100%, 540px);
+    max-width: 100%;
+    min-height: calc(100svh - 132px);
+    gap: 160px;
+  }
+
+  .temple .contact-epilogue__lead {
+    position: static;
+    transform: none;
+    width: auto;
+    max-width: 19ch;
+    font-size: clamp(25px, 6.6vw, 38px);
+    line-height: 1.18;
+    text-align: left;
+  }
+
+  .temple .contact-epilogue__links {
+    position: static;
+    transform: none;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .temple .contact-epilogue__links a {
+    min-height: 48px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  .entry-portal .entry-portal__skip {
+    min-width: 44px;
+    min-height: 44px;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    font-size: 11px;
+  }
+
+  .temple [role='link']:focus-visible,
+  .temple button:focus-visible,
+  .temple a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+  }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .temple *,
+  .temple *::before,
+  .temple *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

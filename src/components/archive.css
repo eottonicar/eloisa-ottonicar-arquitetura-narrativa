@@ -1,0 +1,165 @@
+.archive-masthead {
+  display: grid;
+  align-content: end;
+  gap: .85rem;
+  padding-block: clamp(1.7rem, 6.25vw, 6.5rem);
+  background: var(--paper);
+  color: var(--print);
+}
+
+.archive-page--linea .archive-masthead {
+  color: var(--paper);
+  background: var(--print);
+}
+
+.archive-masthead > p:first-child,
+.archive-entry-meta,
+.archive-stage,
+.archive-tags {
+  font: 600 .76rem/1.4 var(--metadata);
+  letter-spacing: .025em;
+  text-transform: uppercase;
+}
+
+.archive-page .archive-masthead h1 {
+  color: var(--stamp);
+  font: 880 clamp(2.55rem, 16.7vw, 16rem)/.82 var(--display);
+  font-stretch: 64%;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+}
+
+.archive-page--linea .archive-masthead h1 {
+  color: var(--accent);
+  font-size: clamp(4.1rem, 17.5vw, 18rem);
+  font-stretch: 130%;
+  font-weight: 810;
+}
+
+.archive-deck {
+  max-width: 27ch;
+  padding-top: .85rem;
+  border-top: 1px solid currentColor;
+  font: italic 470 clamp(1.4rem, 3.25vw, 2.85rem)/1.03 var(--italic);
+  letter-spacing: -.02em;
+}
+
+.archive-brief {
+  margin: 0;
+  padding-block: clamp(1.5rem, 5vw, 5rem);
+  background: var(--paper);
+}
+
+.archive-brief details {
+  border-top: 1px solid var(--rule);
+}
+
+.archive-brief summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 48px;
+  padding-block: .6rem;
+  font-size: clamp(1.45rem, 4vw, 3.5rem);
+  font-stretch: 82%;
+  font-weight: 790;
+  list-style: none;
+  cursor: pointer;
+}
+
+.archive-brief summary::-webkit-details-marker { display: none; }
+.archive-brief summary::after { content: '+' / ''; color: var(--stamp); }
+.archive-brief details[open] summary { color: var(--stamp); }
+.archive-brief details[open] summary::after { content: '−' / ''; }
+.archive-brief summary:focus-visible { outline: 2px solid var(--print); }
+
+.archive-brief details p {
+  max-width: 48ch;
+  padding-bottom: 1.4rem;
+  font-size: clamp(1rem, 2.1vw, 1.8rem);
+  line-height: 1.3;
+}
+
+.archive-index { padding-block: 0 1.25rem; }
+.archive-index ol { margin: 0; padding: 0; list-style: none; }
+.archive-index a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 48px;
+  padding-block: .55rem;
+  border-top: 1px solid var(--rule);
+  text-decoration: none;
+}
+.archive-index a:hover,
+.archive-index a:focus-visible { color: var(--stamp); text-decoration: underline; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .archive-brief details[open] p { animation: editorial-enter .32s ease-out both; }
+}
+
+.archive-section--home h2 { color: var(--stamp); }
+.editorial .archive-section h2 {
+  max-width: 13ch;
+  margin-bottom: clamp(1.2rem, 3vw, 2.8rem);
+  font-size: clamp(2.7rem, 8.6vw, 8.5rem);
+  text-wrap: balance;
+}
+
+.archive-entries { list-style: none; padding: 0; }
+.archive-entries > li { border-top: 1px solid var(--rule); }
+.archive-entries > li:last-child { border-bottom: 1px solid var(--rule); }
+.archive-entries article {
+  display: grid;
+  gap: .6rem;
+  padding-block: clamp(1rem, 3vw, 2.3rem);
+  scroll-margin-top: 1rem;
+}
+.archive-entries article:target {
+  box-shadow: inset .25rem 0 var(--stamp);
+  padding-inline-start: .8rem;
+}
+.archive-entry-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .75rem; }
+.archive-entry-meta .editorial-folio {
+  padding: .12rem .32rem;
+  background: var(--stamp);
+  color: var(--paper);
+}
+.archive-entry-copy h3 {
+  font-size: clamp(1.65rem, 4.75vw, 4.1rem);
+  font-weight: 790;
+  font-stretch: 78%;
+  line-height: 1.04;
+  letter-spacing: -.045em;
+}
+.archive-entry-copy h3 a { display: inline-block; min-height: 44px; text-decoration-thickness: 1px; text-underline-offset: .12em; }
+.archive-entry-copy h3 a span { font-size: .6em; vertical-align: .18em; }
+.archive-entry-copy p { max-width: 58ch; margin-top: .6rem; }
+.archive-section > .editorial-text-link { margin-top: .7rem; }
+.archive-image { max-width: 48rem; margin-block: 1.25rem; }
+.archive-image figcaption { font-size: .875rem; padding-top: .4rem; }
+.archive-links { display: flex; flex-wrap: wrap; gap: .15rem 1rem; padding: 0; list-style: none; }
+.archive-links a { display: inline-flex; align-items: center; min-height: 44px; }
+
+.archive-footer {
+  --focus: var(--paper);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .5rem 1rem;
+  padding-block: .7rem;
+  background: var(--print);
+  color: var(--paper);
+}
+.editorial-nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: .26em; }
+
+@media (min-width: 48rem) {
+  .archive-masthead { grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: end; }
+  .archive-masthead > p:first-child { grid-column: 1 / -1; }
+  .archive-page--lab .archive-masthead h1 { font-size: clamp(3.65rem, 10.6vw, 13rem); }
+  .archive-page--linea .archive-masthead h1 { font-size: clamp(5.5rem, 14vw, 17rem); }
+  .archive-deck { font-size: clamp(1.35rem, 2.6vw, 3rem); }
+  .archive-entries article { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); }
+  .archive-entry-meta { flex-direction: column; }
+}

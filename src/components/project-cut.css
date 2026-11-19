@@ -1,0 +1,122 @@
+.project-cut {
+  --focus: var(--paper);
+  background: var(--print);
+  color: var(--paper);
+  border-top: .35rem solid var(--stamp);
+}
+
+.project-cut-sticky {
+  display: grid;
+  align-content: center;
+  gap: .75rem;
+  padding-block: 1.5rem;
+}
+
+.project-cut-header,
+.project-cut-frame,
+.project-cut-nav,
+.project-cut-end { width: min(100%, 33rem); margin-inline: auto; }
+
+.project-cut .project-cut-header h2 {
+  font-size: clamp(1.85rem, 7.3vw, 4rem);
+  line-height: 1;
+}
+.project-cut-header h2 > span:first-child { color: var(--accent); }
+.project-cut-hint,
+.project-cut-nav,
+.project-cut .project-cut-replay { display: none; }
+.project-cut-frame { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; }
+.project-cut-shot { position: relative; overflow: hidden; aspect-ratio: 4 / 5; }
+.project-cut-shot img { height: 100%; object-fit: cover; }
+.project-cut-shot figcaption {
+  position: absolute;
+  inset: auto auto .5rem .5rem;
+  padding: .25rem .45rem;
+  background: var(--paper);
+  color: var(--print);
+  font: 600 .72rem/1.3 var(--metadata);
+  text-transform: uppercase;
+}
+.project-cut-end { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 1rem; padding-bottom: 1rem; }
+.project-cut-end:focus-visible { outline: 2px solid var(--paper); }
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-height: 32rem) {
+    body:has(.project-cut),
+    #root:has(.project-cut) { overflow: clip visible; }
+    .project-cut { view-timeline: --corte block; }
+    .project-cut-sticky {
+      position: sticky;
+      top: 0;
+      min-height: 100svh;
+      padding-block: .75rem;
+    }
+    .project-cut-end {
+      position: relative;
+      z-index: 1;
+      margin-top: 125svh;
+      scroll-margin-top: 40svh;
+      background: var(--print);
+    }
+    .project-cut-frame {
+      position: relative;
+      display: block;
+      aspect-ratio: 4 / 5;
+      width: min(100%, 28rem, 53svh);
+      overflow: hidden;
+    }
+    .project-cut-shot { position: absolute; inset: 0; }
+    .project-cut-hint {
+      display: block;
+      margin-top: .5rem;
+      font: 600 .74rem/1.3 var(--metadata);
+      text-transform: uppercase;
+    }
+    .project-cut-nav { display: block; }
+    .project-cut .project-cut-replay { display: inline-flex; }
+    .project-cut-shot--mirror img {
+      transform-origin: 20% 25.7%;
+      animation: project-cut-approach linear both;
+      animation-timeline: --corte;
+      animation-range: contain;
+    }
+    .project-cut-shot--sense {
+      animation: project-cut-aperture linear both;
+      animation-timeline: --corte;
+      animation-range: contain;
+    }
+    .project-cut-shot--sense img {
+      transform-origin: 46% 32.5%;
+      animation: project-cut-withdraw linear both;
+      animation-timeline: --corte;
+      animation-range: contain;
+    }
+    .project-cut-shot--mirror figcaption {
+      animation: project-cut-label linear both;
+      animation-timeline: --corte;
+      animation-range: contain;
+    }
+    .project-cut-shot--sense figcaption {
+      animation: project-cut-label linear reverse both;
+      animation-timeline: --corte;
+      animation-range: contain;
+    }
+  }
+}
+
+@keyframes project-cut-approach {
+  0%, 10% { transform: none; }
+  48%, 100% { transform: translate(30%, 24.3%) scale(4.45); }
+}
+@keyframes project-cut-aperture {
+  0%, 44% { clip-path: circle(0 at 50% 50%); }
+  59%, 100% { clip-path: circle(85% at 50% 50%); }
+}
+@keyframes project-cut-withdraw {
+  0%, 55% { transform: translate(4%, 17.5%) scale(5.2); }
+  91%, 100% { transform: none; }
+}
+@keyframes project-cut-label {
+  0%, 12% { opacity: 1; }
+  25%, 100% { opacity: 0; }
+}

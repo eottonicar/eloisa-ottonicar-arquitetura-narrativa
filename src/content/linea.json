@@ -1,0 +1,10 @@
+{
+  "slug": "linea",
+  "title": "LINEA",
+  "summary": "Uma inteligência de continuidade para arquitetura, em desenvolvimento.",
+  "origin": "O LINEA nasce de uma pergunta sobre a prática arquitetônica: como manter o contexto e as decisões de projeto acessíveis à medida que o trabalho avança?",
+  "problem": "Entre uma etapa e outra, é preciso recuperar tanto o que foi decidido quanto o raciocínio que levou àquela decisão.",
+  "vision": "Investigar como a tecnologia pode ajudar a preservar a continuidade do raciocínio de projeto ao longo do trabalho arquitetônico.",
+  "stage": "Em desenvolvimento",
+  "interfaces": []
+}

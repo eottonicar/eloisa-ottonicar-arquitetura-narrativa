@@ -1,10 +1,22 @@
-import { StrictMode, useEffect } from 'react'
+import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Lenis from '@studio-freight/lenis'
 import './index.css'
+import './mobile.css'
 import App from './App.jsx'
 const usePageEffects = () => {
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+
   useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const updatePreference = (event) => setReducedMotion(event.matches)
+    preference.addEventListener('change', updatePreference)
+    return () => preference.removeEventListener('change', updatePreference)
+  }, [])
+
+  useEffect(() => {
+    if (reducedMotion) return undefined
+
     const lenis = new Lenis({
       duration: 1.35,
       smoothWheel: true,
@@ -63,7 +75,7 @@ const usePageEffects = () => {
       root.style.removeProperty('--parallax-y')
       root.style.removeProperty('--parallax-scroll')
     }
-  }, [])
+  }, [reducedMotion])
 }
 
 export function Root() {

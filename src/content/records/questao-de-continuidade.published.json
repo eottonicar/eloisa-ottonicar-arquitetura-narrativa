@@ -1,0 +1,15 @@
+{
+  "slug": "questao-de-continuidade",
+  "title": "Continuidade como questão de projeto",
+  "summary": "Uma nota sobre o contexto que precisa acompanhar as decisões ao longo de um projeto arquitetônico.",
+  "type": "Nota de investigação",
+  "date": null,
+  "projectStage": "Em desenvolvimento",
+  "tags": ["Arquitetura", "Tecnologia"],
+  "body": [
+    "Uma decisão de projeto carrega um contexto. A pergunta do LINEA é como manter esse contexto acessível quando o trabalho passa de uma etapa para outra."
+  ],
+  "relatedProjects": ["linea"],
+  "featured": false,
+  "publication": "published"
+}

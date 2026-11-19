@@ -1,37 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 
 const MAZE_SYMBOL_SRC = '/images/hero/capa-destaques-2.jpg'
-const ENTRY_SEEN_KEY = 'eloisa-entry-portal-seen-v1'
 const FRAGMENT_COUNT = 6
 const FORMATION_MS = 2600
 const CROSSING_MS = 2200
 const CROSSING_REDUCED_MS = 420
 const MASK_ID = `entry-portal-${Math.random().toString(36).slice(2, 8)}`
-
-const readSeen = () => {
-  try {
-    return window.sessionStorage.getItem(ENTRY_SEEN_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-const writeSeen = () => {
-  try {
-    window.sessionStorage.setItem(ENTRY_SEEN_KEY, '1')
-  } catch {
-    /* storage unavailable — non-fatal */
-  }
-}
-
-const getInitialVisibility = () => {
-  if (typeof window === 'undefined') return false
-  const params = new URLSearchParams(window.location.search)
-  const forced = params.get('intro')
-  if (forced === '0') return false
-  if (forced === '1') return true
-  return !readSeen()
-}
 
 const buildWedgePolygon = (index, count) => {
   const startAngle = (index / count) * Math.PI * 2 - Math.PI / 2
@@ -60,13 +34,13 @@ const FRAGMENTS = Array.from({ length: FRAGMENT_COUNT }, (_, index) => {
   }
 })
 
-function EntryPortal() {
-  const [visible, setVisible] = useState(getInitialVisibility)
+function EntryPortal({ onClose }) {
   const [phase, setPhase] = useState('forming')
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [lowPower, setLowPower] = useState(false)
 
   const rootRef = useRef(null)
+  const skipRef = useRef(null)
   const symbolRef = useRef(null)
   const phaseRef = useRef('forming')
   const pointerRafRef = useRef(0)
@@ -74,11 +48,14 @@ function EntryPortal() {
   const failsafeRef = useRef(0)
 
   useEffect(() => {
+    skipRef.current?.focus({ preventScroll: true })
+  }, [])
+
+  useEffect(() => {
     phaseRef.current = phase
   }, [phase])
 
   useEffect(() => {
-    if (!visible) return undefined
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     const apply = () => setReducedMotion(query.matches)
     apply()
@@ -88,20 +65,17 @@ function EntryPortal() {
       query.removeEventListener('change', apply)
       document.documentElement.classList.remove('entry-lock')
     }
-  }, [visible])
+  }, [])
 
   useEffect(() => {
-    if (!visible) return undefined
     const coarseQuery = window.matchMedia('(max-width: 768px), (hover: none), (pointer: coarse)')
     const apply = () => setLowPower(coarseQuery.matches)
     apply()
     coarseQuery.addEventListener('change', apply)
     return () => coarseQuery.removeEventListener('change', apply)
-  }, [visible])
+  }, [])
 
   useEffect(() => {
-    if (!visible) return undefined
-
     if (reducedMotion) {
       const idleId = window.setTimeout(() => setPhase('idle'), 0)
       return () => window.clearTimeout(idleId)
@@ -109,10 +83,9 @@ function EntryPortal() {
 
     const id = window.setTimeout(() => setPhase('idle'), FORMATION_MS)
     return () => window.clearTimeout(id)
-  }, [visible, reducedMotion])
+  }, [reducedMotion])
 
   useEffect(() => {
-    if (!visible) return undefined
     const root = rootRef.current
     const applyVisibility = () => {
       const hidden = document.hidden
@@ -128,10 +101,10 @@ function EntryPortal() {
     applyVisibility()
     document.addEventListener('visibilitychange', applyVisibility)
     return () => document.removeEventListener('visibilitychange', applyVisibility)
-  }, [visible])
+  }, [])
 
   useEffect(() => {
-    if (!visible || reducedMotion) return undefined
+    if (reducedMotion) return undefined
     const hoverQuery = window.matchMedia('(hover: hover) and (pointer: fine)')
     if (!hoverQuery.matches) return undefined
     const root = rootRef.current
@@ -182,8 +155,9 @@ function EntryPortal() {
     return () => {
       window.removeEventListener('pointermove', handleMove)
       if (pointerRafRef.current) cancelAnimationFrame(pointerRafRef.current)
+      pointerRafRef.current = 0
     }
-  }, [visible, reducedMotion])
+  }, [reducedMotion])
 
   const handleDragMove = (event) => {
     if (reducedMotion || event.pointerType === 'mouse') return
@@ -200,12 +174,7 @@ function EntryPortal() {
     if (phaseRef.current === 'crossing' || phaseRef.current === 'done') return
     setPhase('crossing')
     const duration = reducedMotion ? CROSSING_REDUCED_MS : CROSSING_MS
-    failsafeRef.current = window.setTimeout(() => {
-      writeSeen()
-      document.documentElement.classList.remove('entry-lock')
-      setPhase('done')
-      setVisible(false)
-    }, duration)
+    failsafeRef.current = window.setTimeout(onClose, duration)
   }
 
   useEffect(() => () => {
@@ -213,8 +182,6 @@ function EntryPortal() {
     if (pointerRafRef.current) cancelAnimationFrame(pointerRafRef.current)
     document.documentElement.classList.remove('entry-lock')
   }, [])
-
-  if (!visible) return null
 
   const phaseClass = phase === 'forming' ? ' is-forming' : phase === 'crossing' ? ' is-crossing' : ' is-idle'
   const motionClass = reducedMotion ? ' entry-portal--simple' : ''
@@ -224,6 +191,19 @@ function EntryPortal() {
     <div
       ref={rootRef}
       className={`entry-portal${phaseClass}${motionClass}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Portal do Mapa da Travessia"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onClose()
+        if (event.key === 'Tab') {
+          event.preventDefault()
+          const target = event.target === skipRef.current
+            ? rootRef.current?.querySelector('.entry-portal__button')
+            : skipRef.current
+          target?.focus()
+        }
+      }}
       onPointerMove={handleDragMove}
     >
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" focusable="false">
@@ -308,7 +288,7 @@ function EntryPortal() {
         <span className="entry-portal__clue">ENTRE</span>
       </button>
 
-      <button type="button" className="entry-portal__skip" onClick={cross}>
+      <button ref={skipRef} type="button" className="entry-portal__skip" onClick={onClose}>
         PULAR INTRO
       </button>
     </div>

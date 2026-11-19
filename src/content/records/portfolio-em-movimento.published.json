@@ -1,0 +1,16 @@
+{
+  "slug": "portfolio-em-movimento",
+  "title": "Da galeria ao arquivo em movimento",
+  "summary": "A reformulação do portfólio abre espaço para acompanhar o trabalho enquanto ele acontece.",
+  "type": "Registro de processo",
+  "date": "2026-11-17",
+  "projectStage": "Em desenvolvimento",
+  "tags": ["Design editorial", "Desenvolvimento web"],
+  "body": [
+    "Na abertura, fragmentos de Solaris e Sense se encaixam numa composição de planta baixa. O percurso em degraus reaparece no capítulo LINEA.",
+    "Nesta etapa, o portfólio ganhou um Laboratório. Os registros podem aparecer na home e junto ao projeto a que se referem, a partir de um único arquivo de conteúdo."
+  ],
+  "relatedProjects": ["portfolio", "solaris", "sense"],
+  "featured": true,
+  "publication": "published"
+}

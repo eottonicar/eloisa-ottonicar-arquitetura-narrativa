@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import heroArquiteturaAtmosfera from './assets/hero-arquitetura-atmosfera.png'
 import EntryPortal from './components/EntryPortal.jsx'
+import EditorialHome from './components/EditorialHome.jsx'
+import ArchivePage from './components/ArchivePage.jsx'
 
 const ROUTES = {
   home: '/',
+  lab: '/laboratorio',
+  linea: '/linea',
+  map: '/mapa',
   worlds: '/mundos',
   applied: '/aplicados',
   contact: '/contato',
@@ -21,6 +26,8 @@ const normalizePath = (rawPath = '/') => {
 
 function App() {
   const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname || '/'))
+  const [portalOpen, setPortalOpen] = useState(false)
+  const portalTriggerRef = useRef(null)
   const mapaRef = useRef(null)
   const senseFieldRef = useRef(null)
   const mapaInteractionRef = useRef({
@@ -29,7 +36,7 @@ function App() {
     handlePointerLeave: () => {},
   })
 
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [activeTerritory, setActiveTerritory] = useState(null)
   const mapaCanvasRef = useRef(null)
   const tapGateRef = useRef({ id: null, wasActive: false })
@@ -177,32 +184,10 @@ function App() {
     if (window.location.pathname === destination) return
     window.history.pushState({}, '', destination)
     setCurrentPath(destination)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'instant' : 'smooth' })
   }
 
-  const navigateToHomeMapa = () => {
-    const scrollToMapa = () => {
-      const mapaStage = document.querySelector('.mapa-stage')
-      if (!mapaStage) return false
-      mapaStage.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      return true
-    }
-
-    if (currentPath === ROUTES.home) {
-      scrollToMapa()
-      return
-    }
-
-    navigateTo(ROUTES.home)
-    let attempts = 0
-    const maxAttempts = 18
-    const tick = () => {
-      attempts += 1
-      if (scrollToMapa() || attempts >= maxAttempts) return
-      window.requestAnimationFrame(tick)
-    }
-    window.requestAnimationFrame(tick)
-  }
+  const navigateToHomeMapa = () => navigateTo(ROUTES.map)
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -227,6 +212,7 @@ function App() {
 
   useEffect(() => {
     const handlePopState = () => {
+      setPortalOpen(false)
       const normalizedPath = normalizePath(window.location.pathname || '/')
       if (!KNOWN_ROUTES.has(normalizedPath)) {
         window.history.replaceState({}, '', ROUTES.home)
@@ -254,7 +240,7 @@ function App() {
   }, [isProjectsRoute, isContactRoute])
 
   useEffect(() => {
-    if (!isWorldsRoute) return undefined
+    if (!isWorldsRoute || reducedMotion) return undefined
 
     let rafId = 0
     let currentX = 0
@@ -302,10 +288,10 @@ function App() {
       window.removeEventListener('mousemove', updateMouseTarget)
       window.removeEventListener('scroll', updateScrollTarget)
     }
-  }, [isWorldsRoute])
+  }, [isWorldsRoute, reducedMotion])
 
   useEffect(() => {
-    if (isWorldsRoute) return undefined
+    if (currentPath !== ROUTES.map || reducedMotion) return undefined
     const stage = mapaRef.current
     if (!stage) return undefined
 
@@ -547,7 +533,7 @@ function App() {
       window.removeEventListener('resize', handleResize)
       coarseQuery.removeEventListener('change', handleQueryChange)
     }
-  }, [isWorldsRoute])
+  }, [currentPath, reducedMotion])
 
   if (isContactRoute) {
     return (
@@ -742,11 +728,12 @@ function App() {
                               className="project-field__media-intro-video"
                               src={project.introVideo}
                               poster="/images/applied/ape-el/OLLIE.jpeg"
-                              autoPlay
+                              autoPlay={!reducedMotion}
+                              controls={reducedMotion}
                               muted
                               loop
                               playsInline
-                              preload="auto"
+                              preload={reducedMotion ? 'none' : 'auto'}
                               aria-label={`Vídeo de abertura ${project.name}`}
                             />
                           </div>
@@ -813,9 +800,27 @@ function App() {
     )
   }
 
+  if (currentPath === ROUTES.lab || currentPath === ROUTES.linea) {
+    return <ArchivePage routes={ROUTES} page={currentPath === ROUTES.linea ? 'linea' : 'lab'} />
+  }
+
+  if (currentPath !== ROUTES.map) {
+    return <EditorialHome routes={ROUTES} worlds={projectGroups[0]} applied={appliedProjectsGroup} />
+  }
+
+  const closePortal = () => {
+    setPortalOpen(false)
+    requestAnimationFrame(() => portalTriggerRef.current?.focus())
+  }
+
   return (
       <main className="temple">
-      <EntryPortal />
+      {portalOpen && <EntryPortal onClose={closePortal} />}
+      <div inert={portalOpen}>
+      <nav className="mapa-toolbar" aria-label="Navegação da travessia">
+        <a href={ROUTES.home}>← Voltar ao portfólio</a>
+        <button ref={portalTriggerRef} type="button" onClick={() => setPortalOpen(true)}>Abrir portal</button>
+      </nav>
       <section
         className={`mapa-stage mapa-stage--gate${reducedMotion ? ' mapa-stage--reduced' : ''}`}
         ref={mapaRef}
@@ -880,7 +885,8 @@ function App() {
                 }`}
                 data-node={territory.slot.replace('p-', 'p')}
                 data-links={territory.links}
-                role="link"
+                role={territory.route ? 'link' : 'button'}
+                aria-expanded={territory.route ? undefined : isRevealed}
                 tabIndex={0}
                 onClick={activate}
                 onKeyDown={(event) => {
@@ -914,6 +920,7 @@ function App() {
           })}
         </div>
       </section>
+      </div>
     </main>
   )
 }
